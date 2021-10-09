@@ -1,5 +1,6 @@
 package app.com.cms2.controller;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,12 +29,17 @@ import org.springframework.web.bind.annotation.RestController;
 import app.com.cms2.ResourceNotFoundException;
 import app.com.cms2.message.request.RegisterForm;
 import app.com.cms2.message.request.UpdateForm;
+import app.com.cms2.model.Notification;
 import app.com.cms2.model.Role;
 import app.com.cms2.model.RoleName;
 import app.com.cms2.model.User;
+import app.com.cms2.repository.NotificationRepository;
 import app.com.cms2.repository.ReservationMachineRepository;
 import app.com.cms2.repository.RoleRepository;
 import app.com.cms2.repository.UserRepository;
+
+import reactor.core.publisher.Flux;
+import org.springframework.http.codec.ServerSentEvent;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -121,6 +127,13 @@ public class AdminController {
 				.orElseThrow(() -> new ResourceNotFoundException("Employee not found for this id :: " + userId));
 		return ResponseEntity.ok().body(user);
 	}
+	
+	@GetMapping("/user/{username}")
+	public ResponseEntity<Long> getUserByUsername(@PathVariable(value = "username") String username) {
+		Long userId = userRepository.findByUsername(username).get().getId();
+				
+		return ResponseEntity.ok().body(userId);
+	}
 
 	@PutMapping("/update/{id}")
 	public ResponseEntity<User> updateUser(@PathVariable(value = "id") Long userId, @RequestBody UpdateForm updateForm)
@@ -166,5 +179,15 @@ public class AdminController {
 		Map<String, Boolean> response = new HashMap<>();
 		response.put("deleted", Boolean.TRUE);
 		return response;
+	}
+	
+	@Autowired
+	NotificationRepository notificationRepository;
+	
+	@GetMapping("/progress/{userId}")
+	public Flux<ServerSentEvent<List<Notification>>> streamEvents(@PathVariable Long userId) {
+		return Flux.interval(Duration.ofSeconds(3))
+				.map(sequence -> ServerSentEvent.<List<Notification>>builder().id(String.valueOf(sequence)).event("progressEvent")
+						.data(this.notificationRepository.getALLByUserId(userId)).build());
 	}
 }

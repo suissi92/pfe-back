@@ -156,17 +156,7 @@ public class MachineController {
 
 			line.addMachine(affectMachinesToLineRequest.getMachine());
 
-			/*
-			 * Set<Machine> strMachines = affectMachinesToLineRequest.getMachines(); (
-			 * strMachines).forEach(machine -> {
-			 * 
-			 * machine.setLine(line); machineRepository.save(machine); });
-			 * 
-			 * line.setName(affectMachinesToLineRequest.getName());
-			 * line.setDescription(affectMachinesToLineRequest.getDescription());
-			 * line.setMachines(affectMachinesToLineRequest.getMachines()); final Line
-			 * affectMachinesToLine = lineRepository.save(line);
-			 */
+			
 
 			return ResponseEntity.ok(lineRepository.save(line));
 		}

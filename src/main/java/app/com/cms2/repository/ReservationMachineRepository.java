@@ -2,6 +2,7 @@ package app.com.cms2.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -29,7 +30,7 @@ public interface ReservationMachineRepository extends JpaRepository <Reservation
 	List<ReservationMachine> findActiveReservationMachine();
 	
 	@Query(value="select r from ReservationMachine r where r.user.id = :id and r.finish_date >= NOW() ")
-	ReservationMachine findActiveReservationForUser(@Param("id")Long id);
+	ReservationMachine findActiveReservationForUser(@Param("id") long userId);
 	
 	@Query(value="SELECT m FROM Machine m WHERE m.id not in (select r.machine.id from ReservationMachine r where r.finish_date > NOW())")
 	List<Machine> findFreeMachines();

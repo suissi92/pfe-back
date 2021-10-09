@@ -1,9 +1,11 @@
 package app.com.cms2.model;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,11 +15,15 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import ch.qos.logback.core.rolling.helper.TimeBasedArchiveRemover;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +33,7 @@ import lombok.Setter;
 @Setter(AccessLevel.PUBLIC)
 @Getter(AccessLevel.PUBLIC)
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table (name = "reservation_line")
 public class ReservationLine  {
 	
@@ -43,21 +50,34 @@ public class ReservationLine  {
 	Line line;
 	
 
-    @Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.DATE)
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @Column(name = "start_date")
     private Date start_date ;
     
-    @Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.DATE)
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @Column(name = "finish_date")
     private Date finish_date ;
     
-    @CreatedDate
-    private Date created = new Date();
    
     @LastModifiedDate
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @Column(name = "lastUpdate")
     private Date lastUpdate = new Date();
+    
+    @CreatedDate
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @Column(name = "created")
+    private Date created = new Date();
+    
+    @CreatedBy
+    @Column(name = "createdBy")
+    private String createdBy ;
+    
+    @LastModifiedBy
+    @Column(name = "modifiedBy")
+    private String modifiedBy ;
 
 	public Long getId() {
 		return id;
@@ -99,12 +119,12 @@ public class ReservationLine  {
 		this.finish_date = finish_date;
 	}
 
-	public ReservationLine(User user, Line line, Date start_date, Date finish_date) {
+	public ReservationLine(User user, Line line, Date date, Date date2) {
 		
 		this.user = user;
 		this.line = line;
-		this.start_date = start_date;
-		this.finish_date = finish_date;
+		this.start_date = date;
+		this.finish_date = date2;
 	}
 
 	public ReservationLine() {

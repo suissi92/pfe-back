@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 
+
 public class Machine {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

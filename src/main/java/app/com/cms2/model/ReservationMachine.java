@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -29,8 +30,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotBlank;
 
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -42,6 +46,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Getter(AccessLevel.PUBLIC)
 @Entity
 @Table (name = "reservation_machine")
+
+@EntityListeners(AuditingEntityListener.class)
 
 public class ReservationMachine  {
 
@@ -73,6 +79,14 @@ public class ReservationMachine  {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @Column(name = "created")
     private Date created = new Date();
+    
+    @CreatedBy
+    @Column(name = "createdBy")
+    private String createdBy ;
+    
+    @LastModifiedBy
+    @Column(name = "modifiedBy")
+    private String modifiedBy ;
    
     @LastModifiedDate
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")

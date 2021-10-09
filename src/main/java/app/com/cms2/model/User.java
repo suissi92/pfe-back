@@ -2,7 +2,9 @@ package app.com.cms2.model;
 
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -23,6 +25,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.NaturalId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 
@@ -72,7 +76,9 @@ public class User{
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL)
     private Set<ReservationLine> reservationsLine = new HashSet<>();
   
-    
+    @JsonIgnore
+    @OneToMany(mappedBy="user")
+    private List<Notification> notifications;
     
     public User(String name,String username,String email, String password, Set<Role> roles, Machine machine) {
 		
@@ -155,4 +161,22 @@ public class User{
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+
+
+	public List<Notification> getNotifications() {
+		return notifications;
+	}
+
+
+
+	public void setNotifications(List<Notification> notifications) {
+		this.notifications = notifications;
+	}
+    
+	public void addNotification(Notification notification) {
+		if(this.notifications==null)
+			this.notifications= new ArrayList<>();
+		this.notifications.add(notification);
+	}
 }

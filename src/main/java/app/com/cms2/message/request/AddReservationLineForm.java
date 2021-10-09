@@ -1,5 +1,6 @@
 package app.com.cms2.message.request;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -25,12 +26,12 @@ public class AddReservationLineForm {
 
 	private User user;
 
-	@Temporal(TemporalType.DATE)
+	
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
 	@Column(name = "start_date")
 	private Date start_date;
 
-	@Temporal(TemporalType.DATE)
+	
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
 	@Column(name = "finish_date")
 	private Date finish_date;

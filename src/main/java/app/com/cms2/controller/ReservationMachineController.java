@@ -1,6 +1,7 @@
 package app.com.cms2.controller;
 
-import java.sql.Date;
+
+import java.util.Date;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -29,10 +30,12 @@ import app.com.cms2.message.request.UpdateLineForm;
 import app.com.cms2.message.request.UpdateReservationMachineForm;
 import app.com.cms2.model.Line;
 import app.com.cms2.model.Machine;
+import app.com.cms2.model.Notification;
 import app.com.cms2.model.ReservationLine;
 import app.com.cms2.model.ReservationMachine;
 import app.com.cms2.model.User;
 import app.com.cms2.repository.MachineRepository;
+import app.com.cms2.repository.NotificationRepository;
 import app.com.cms2.repository.ReservationMachineRepository;
 import app.com.cms2.repository.UserRepository;
 
@@ -49,6 +52,9 @@ public class ReservationMachineController {
 
 	@Autowired
 	private ReservationMachineRepository reservationMachineRepository;
+	
+	@Autowired
+	NotificationRepository notificationRepository;
 
 	@GetMapping("/list-reservation")
 	public ResponseEntity<List<ReservationMachine>> getAllReservationMachine() {
@@ -85,11 +91,6 @@ public class ReservationMachineController {
 
 	@PostMapping("/add-reservation")
     public ResponseEntity<String> addReservationMachine(@Valid @RequestBody AddReservationMachineForm addReservationMachineRequest) {
-        
-        // Creating reservation
-	
-		
-		
 				ReservationMachine activeReservation =reservationMachineRepository.findActiveReservationForUser(
 						addReservationMachineRequest.getUser().getId());
 				if (activeReservation == null ) {
@@ -98,8 +99,15 @@ public class ReservationMachineController {
         		addReservationMachineRequest.getMachine(),
         		addReservationMachineRequest.getStart_date(),
         		addReservationMachineRequest.getFinish_date());
-      
         reservationMachineRepository.save(reservationMachine);
+        Notification notification = new Notification();
+        notification.setConsulted(false);
+        notification.setUser(addReservationMachineRequest.getUser());
+        notification.setMessage("notification : user "  + addReservationMachineRequest.getUser().getUsername()
+        		+ "has been affected to machine "+ addReservationMachineRequest.getMachine().getName());
+        notification.setDateCreation(new Date());
+        
+        notificationRepository.save(notification);
         return ResponseEntity.ok().body("reservation  registered successfully!");
 				}
 				else    return new ResponseEntity<String>("Fail ->user is already reserved",
@@ -112,10 +120,13 @@ public class ReservationMachineController {
 		return ResponseEntity.ok(reservationMachineRepository.findActiveReservationMachine());
 	}
 	
-	@GetMapping("/user-active-reservation")
-	public ResponseEntity<ReservationMachine> getUserActiveReservationMachine(Long id) {
-
-		return ResponseEntity.ok(reservationMachineRepository.findActiveReservationForUser(id));
+	@GetMapping("/user-active-reservation/{id}")
+	public ResponseEntity<ReservationMachine> getUserActiveReservationMachine(@PathVariable(value = "id") Long userId) {
+        ReservationMachine rm = reservationMachineRepository.findActiveReservationForUser(userId);
+		if (rm != null) {
+			return ResponseEntity.ok(rm);
+		}
+		return ResponseEntity.ok(null);
 	}
 	
 	
