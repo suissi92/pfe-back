@@ -1,17 +1,13 @@
 package app.com.cms2.controller;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,12 +25,20 @@ import app.com.cms2.message.request.AffectMachinesToLineForm;
 import app.com.cms2.message.request.UpdateMachineForm;
 import app.com.cms2.model.Line;
 import app.com.cms2.model.Machine;
-import app.com.cms2.model.Role;
+import app.com.cms2.model.MachineSession;
+import app.com.cms2.model.Notification;
+import app.com.cms2.model.ReservationLine;
+import app.com.cms2.model.ReservationMachine;
 import app.com.cms2.model.User;
+import app.com.cms2.model.UserSession;
 import app.com.cms2.repository.LineRepository;
 import app.com.cms2.repository.MachineRepository;
+import app.com.cms2.repository.MachineSessionRepository;
+import app.com.cms2.repository.NotificationRepository;
+import app.com.cms2.repository.ReservationLineRepository;
 import app.com.cms2.repository.ReservationMachineRepository;
 import app.com.cms2.repository.UserRepository;
+import app.com.cms2.repository.UserSessionRepository;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -49,9 +53,18 @@ public class MachineController {
 
 	@Autowired
 	private LineRepository lineRepository;
+	
+	@Autowired
+	private MachineSessionRepository machineSessionRepository;
 
 	@Autowired
 	private ReservationMachineRepository reservationMachineRepository;
+	
+	@Autowired
+	private ReservationLineRepository reservationLineRepository;
+	
+	@Autowired
+	NotificationRepository notificationRepository;
 
 	@PostMapping("/add")
 	public ResponseEntity<Machine> addMachine(@Valid @RequestBody AddMachineForm addMachineRequest) {
@@ -75,6 +88,20 @@ public class MachineController {
 	public ResponseEntity<List<Machine>> getFreeMachine() {
 
 		return ResponseEntity.ok(machineRepository.findByLineIsNull());
+	}
+	
+
+	
+	@GetMapping("/active-machines")
+	public ResponseEntity<List<MachineSession>> getActiveMachines() {
+
+		return ResponseEntity.ok(machineSessionRepository.findOpenMachineSession());
+	}
+	
+	@GetMapping("/machine-sessions/{id}")
+	public ResponseEntity<List<MachineSession>> getUserSessions(@PathVariable(value = "id") Long machineId) {
+
+		return ResponseEntity.ok(machineSessionRepository.findAllMachineSessions(machineId));
 	}
 
 	@GetMapping("/unreserved-machine")
@@ -106,6 +133,65 @@ public class MachineController {
 
 		final Machine updatedMachine = machineRepository.save(machine);
 		return ResponseEntity.ok(updatedMachine);
+	}
+
+	@GetMapping("/updateMachineStatus/{id}")
+	public ResponseEntity<Machine> updateMachine(@PathVariable(value = "id") Long machineId) {
+		Machine machine = machineRepository.findById(machineId).orElse(null);
+		long lineId =  machine.getLine().getId();
+	    ReservationLine rl = reservationLineRepository.findActiveReservationForLine(lineId).orElse(null);
+	    
+		    
+		    ReservationMachine rm = reservationMachineRepository.findActiveReservationForMachine(machineId);
+		    User machinist = rm.getUser();
+		if (java.util.Objects.nonNull(machine)) {
+			machine.setStatus(!machine.isStatus());
+			machine = machineRepository.save(machine);
+		}
+		if (machine.isStatus()== true) {
+			 MachineSession machineSession = new MachineSession();
+			    machineSession.setMachine(machine);
+			    machineSession.setStart_date(new Date());
+			    machineSession.setStatus(true);
+			    machineSession.setUser(machinist);
+			    machineSessionRepository.save(machineSession);
+			    //notifier le line manager de larret de la machine 
+			   
+			    if (rl != null) {
+			    	User lm = rl.getUser();
+			    Notification notification = new Notification();
+		        notification.setConsulted(false);
+		        notification.setUser(lm);
+		        notification.setMessage("notification : machine "  + machine.getName()
+		        		+ "has been started at"+ machineSession.getStart_date());
+		        notification.setDateCreation(new Date());
+		        
+		        notificationRepository.save(notification);
+			    }
+		}
+		if (machine.isStatus()==false) {
+			
+			MachineSession machineSession = machineSessionRepository.findSessionByMachineId(machineId).orElse(null);
+			machineSession.setFinish_date(new Date());
+			machineSession.setStatus(false);
+			machineSessionRepository.save(machineSession);
+			 if (rl != null) {
+			    	User lm = rl.getUser();
+			
+			Notification notification = new Notification();
+	        notification.setConsulted(false);
+	        notification.setUser(lm);
+	        notification.setMessage("notification : machine "  + machine.getName()
+	        		+ "has been stopped at"+ machineSession.getFinish_date());
+	        notification.setDateCreation(new Date());
+	        
+	        notificationRepository.save(notification);
+			 }
+		}
+		 
+		   
+
+		return ResponseEntity.ok(machine);
 	}
 
 	/*
@@ -155,8 +241,6 @@ public class MachineController {
 							"line not found for this id :: " + affectMachinesToLineRequest.getId()));
 
 			line.addMachine(affectMachinesToLineRequest.getMachine());
-
-			
 
 			return ResponseEntity.ok(lineRepository.save(line));
 		}

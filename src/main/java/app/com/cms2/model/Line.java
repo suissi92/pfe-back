@@ -39,10 +39,10 @@ public class Line {
     
     @JsonManagedReference
 	@OneToMany(mappedBy = "line", cascade = CascadeType.ALL,  fetch = FetchType.LAZY )
-	private Set<Machine> machines = new HashSet<>();
+	private Set<Machine> machines = new HashSet<Machine>();
     
     @OneToMany(mappedBy = "line", cascade = CascadeType.ALL)
-	private  Set<ReservationLine> reservationsLine = new HashSet<>();
+	private  Set<ReservationLine> reservationsLine = new HashSet<ReservationLine>();
 
     public Line addMachine(Machine m) {
     	this.machines.add(m);

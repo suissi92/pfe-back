@@ -29,8 +29,18 @@ public interface ReservationMachineRepository extends JpaRepository <Reservation
 	@Query(value="select r from ReservationMachine r where r.finish_date >= NOW() ")
 	List<ReservationMachine> findActiveReservationMachine();
 	
+	@Query(value="select r from ReservationMachine r where r.machine.mtype='AOI'  ")
+	List<ReservationMachine> findReservationMachineAOI();
+	
+	@Query(value="select r from ReservationMachine r where r.machine.mtype='SPI' ")
+	List<ReservationMachine> findReservationMachineSPI();
+	
+	
 	@Query(value="select r from ReservationMachine r where r.user.id = :id and r.finish_date >= NOW() ")
 	ReservationMachine findActiveReservationForUser(@Param("id") long userId);
+	
+	@Query(value="select r from ReservationMachine r where r.machine.id = :id and r.finish_date >= NOW() ")
+	ReservationMachine findActiveReservationForMachine(@Param("id") long machineId);
 	
 	@Query(value="SELECT m FROM Machine m WHERE m.id not in (select r.machine.id from ReservationMachine r where r.finish_date > NOW())")
 	List<Machine> findFreeMachines();

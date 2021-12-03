@@ -64,7 +64,7 @@ public class Machine {
 	  private Line line;
 	  
 	  @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
-	  private  Set<ReservationMachine> reservationsMachine = new HashSet<>();
+	  private  Set<ReservationMachine> reservationsMachine = new HashSet<ReservationMachine>();
 	  
 	
 	  public Machine(long id,  String name, String description, boolean status, 

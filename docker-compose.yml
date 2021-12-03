@@ -1,0 +1,44 @@
+version: "3"
+services:
+  MYSQL-docker:
+    container_name: MYSQL-docker  
+    image: mysql 
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=cms
+      - MYSQL_PASSWORD=root
+      
+    ports:
+      - 3306:3306
+    restart: always
+  cms2-0.0.1-snapshot.jar:
+    image: cms2-0.0.1-snapshot.jar
+    ports:
+      - "8080:8080"
+    restart: always  
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://MYSQL-docker:3306/cms
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "root"
+      
+      
+    build:
+      context: "./"
+      dockerfile: "DockerFile"
+    depends_on:
+      - MYSQL-docker
+    links:
+      - MYSQL-docker
+
+  frontend:
+    build: 
+      context: "C:/Users/souis/Desktop/ant-design-angular-boilerplate"
+      dockerfile: "DockerFile" 
+    container_name: cms-angular
+    links:
+           - cms2-0.0.1-snapshot.jar
+    depends_on:
+           - cms2-0.0.1-snapshot.jar
+    ports:
+           - "4200:4200" 
+              

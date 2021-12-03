@@ -13,56 +13,40 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
-@Table(name = "reservation_line")
-public class ReservationLine {
+@Table(name = "user_session")
+public class UserSession {
 
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
-	User user;
-
-	@ManyToOne
-	@JoinColumn(name = "line_id", nullable = false)
-	Line line;
-
-	@Temporal(TemporalType.TIMESTAMP)
+	private User user;
+	
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "start_date")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date start_date;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "finish_date")
 	private Date finish_date;
+	
+	private boolean status;
 
-	@LastModifiedDate
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "lastUpdate")
-	private Date lastUpdate = new Date();
+	public boolean isStatus() {
+		return status;
+	}
 
-	@CreatedDate
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "created")
-	private Date created = new Date();
-
-	@CreatedBy
-	@Column(name = "createdBy")
-	private String createdBy;
-
-	@LastModifiedBy
-	@Column(name = "modifiedBy")
-	private String modifiedBy;
+	public void setStatus(boolean status) {
+		this.status = status;
+	}
 
 	public Long getId() {
 		return id;
@@ -78,14 +62,6 @@ public class ReservationLine {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	public Line getLine() {
-		return line;
-	}
-
-	public void setLine(Line line) {
-		this.line = line;
 	}
 
 	public Date getStart_date() {
@@ -104,16 +80,17 @@ public class ReservationLine {
 		this.finish_date = finish_date;
 	}
 
-	public ReservationLine(User user, Line line, Date date, Date date2) {
+	public UserSession() {
+		super();
+	}
 
+	public UserSession(Long id, User user, Date start_date, Date finish_date , boolean status) {
+		
 		this.user = user;
-		this.line = line;
-		this.start_date = date;
-		this.finish_date = date2;
+		this.start_date = start_date;
+		this.finish_date = finish_date;
+		this.status = status;
 	}
-
-	public ReservationLine() {
-
-	}
-
+	
+	
 }

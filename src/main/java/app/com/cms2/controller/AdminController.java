@@ -33,11 +33,12 @@ import app.com.cms2.model.Notification;
 import app.com.cms2.model.Role;
 import app.com.cms2.model.RoleName;
 import app.com.cms2.model.User;
+import app.com.cms2.model.UserSession;
 import app.com.cms2.repository.NotificationRepository;
 import app.com.cms2.repository.ReservationMachineRepository;
 import app.com.cms2.repository.RoleRepository;
 import app.com.cms2.repository.UserRepository;
-
+import app.com.cms2.repository.UserSessionRepository;
 import reactor.core.publisher.Flux;
 import org.springframework.http.codec.ServerSentEvent;
 
@@ -58,6 +59,7 @@ public class AdminController {
 	@Autowired
 	ReservationMachineRepository  reservationMachineRepository;
 	
+
 
 	@PostMapping("/add")
 	public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterForm registerRequest) {
@@ -109,7 +111,23 @@ public class AdminController {
 
 		return ResponseEntity.ok(userRepository.findAll());
 	}
+	
+	  @Autowired
+	  UserSessionRepository userSessionRepository;
 
+	
+	@GetMapping("/active-users")
+	public ResponseEntity<List<UserSession>> getActiveUsers() {
+
+		return ResponseEntity.ok(userSessionRepository.findOpenSession());
+	}
+	
+	@GetMapping("/user-sessions/{id}")
+	public ResponseEntity<List<UserSession>> getUserSessions(@PathVariable(value = "id") Long userId) {
+
+		return ResponseEntity.ok(userSessionRepository.findAllUserSessions(userId));
+	}
+	
 	@GetMapping("/list-free-users-by-roleId/{id}")
 	public ResponseEntity<List<User>> getAllMachinist(@PathVariable("id")Long id) {
 		List<User> users = new ArrayList<>();
@@ -130,7 +148,7 @@ public class AdminController {
 	
 	@GetMapping("/user/{username}")
 	public ResponseEntity<Long> getUserByUsername(@PathVariable(value = "username") String username) {
-		Long userId = userRepository.findByUsername(username).get().getId();
+		Long userId = userRepository.findByUsername(username).getId();
 				
 		return ResponseEntity.ok().body(userId);
 	}
@@ -190,4 +208,13 @@ public class AdminController {
 				.map(sequence -> ServerSentEvent.<List<Notification>>builder().id(String.valueOf(sequence)).event("progressEvent")
 						.data(this.notificationRepository.getALLByUserId(userId)).build());
 	}
+	
+	@PutMapping("/updateNotif/{notificationId}")
+	public ResponseEntity<User> updateNotif (@PathVariable Long notificationId) {
+			Notification notif = notificationRepository.findById(notificationId)
+					.orElse(null);
+		notif.setConsulted(true);
+		this.notificationRepository.save(notif);
+		return null ;
+			}
 }

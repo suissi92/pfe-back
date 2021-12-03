@@ -56,6 +56,18 @@ public class ReservationMachineController {
 	@Autowired
 	NotificationRepository notificationRepository;
 
+	@GetMapping("/list-reservation-aoi")
+	public ResponseEntity<List<ReservationMachine>> getAOIReservationMachine() {
+
+		return ResponseEntity.ok(reservationMachineRepository.findReservationMachineAOI());
+	}
+	
+	@GetMapping("/list-reservation-spi")
+	public ResponseEntity<List<ReservationMachine>> getSPIReservationMachine() {
+
+		return ResponseEntity.ok(reservationMachineRepository.findReservationMachineSPI());
+	}
+	
 	@GetMapping("/list-reservation")
 	public ResponseEntity<List<ReservationMachine>> getAllReservationMachine() {
 

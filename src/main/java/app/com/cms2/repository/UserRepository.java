@@ -14,14 +14,14 @@ import app.com.cms2.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	Optional<User> findByUsername(String username);
+	User findByUsername(String username);
 
 	Boolean existsByUsername(String username);
 
 	Boolean existsByEmail(String email);
 
 //	@Query("select * from User u join Role r on u.id = r.id where r.id = :roleId")
-@Query("select u from User u left join fetch u.roles where u.id = :roleId")
-List<User> findMachinist(@Param("roleId") long roleId);
+	@Query("select u from User u left join fetch u.roles where u.id = :roleId")
+	List<User> findMachinist(@Param("roleId") long roleId);
 
 }

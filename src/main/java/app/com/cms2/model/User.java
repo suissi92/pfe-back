@@ -68,13 +68,15 @@ public class User{
     @JoinTable(name = "user_roles", 
     	joinColumns = @JoinColumn(name = "user_id"), 
     	inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<Role>();
     
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL)
-    private Set<ReservationMachine> reservationsMachine = new HashSet<>();
+    private Set<ReservationMachine> reservationsMachine = new HashSet<ReservationMachine>();
+    
+   
     
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL)
-    private Set<ReservationLine> reservationsLine = new HashSet<>();
+    private Set<ReservationLine> reservationsLine = new HashSet<ReservationLine>();
   
     @JsonIgnore
     @OneToMany(mappedBy="user")
@@ -176,7 +178,7 @@ public class User{
     
 	public void addNotification(Notification notification) {
 		if(this.notifications==null)
-			this.notifications= new ArrayList<>();
+			this.notifications= new ArrayList<Notification>();
 		this.notifications.add(notification);
 	}
 }
